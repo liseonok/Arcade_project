@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Arcade_project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Arcade_project.iml" afterDir="false" />
+    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="картинки и мобы">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/background_menu.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/background_menu.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/start_game_button_2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/start_game_button_2.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +55,7 @@
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python.aaa.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check.executor&quot;: &quot;Run&quot;,
     &quot;Python.game.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -69,8 +67,15 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\tilesets" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\things" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\food" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\characters" />
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\interface" />
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images" />
     </key>
   </component>
@@ -89,6 +94,28 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/aaa.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="check" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Arcade_project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/check.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -122,6 +149,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.game" />
+        <item itemvalue="Python.check" />
         <item itemvalue="Python.aaa" />
       </list>
     </recent_temporary>
@@ -141,6 +169,23 @@
       <option name="presentableId" value="Default" />
       <updated>1765534254489</updated>
     </task>
+    <task id="LOCAL-00001" summary="почти вся игра, добавила классы, осталась свзяь, все картинки">
+      <option name="closed" value="true" />
+      <created>1769461471895</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769461471895</updated>
+    </task>
+    <task id="LOCAL-00002" summary="картинки и мобы">
+      <option name="closed" value="true" />
+      <created>1769514330839</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769514330839</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -165,5 +210,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="почти вся игра, добавила классы, осталась свзяь, все картинки" />
+    <MESSAGE value="картинки и мобы" />
+    <option name="LAST_COMMIT_MESSAGE" value="картинки и мобы" />
   </component>
 </project>
