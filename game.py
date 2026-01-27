@@ -24,6 +24,7 @@ ITEM_SPAWN_RATE = 0.05  # Шанс появления предмета за ка
 PICKUP_DISTANCE = 60
 MIN_ITEMS_PER_CHUNK = 1  # Минимум предметов в чанке
 MAX_ITEMS_PER_CHUNK = 5  # Максимум предметов в чанке
+LEVEL = 1
 
 
 class BackgroundSprite(arcade.Sprite):
@@ -44,7 +45,7 @@ class StartMenu(arcade.View):
 
     def __init__(self):
         super().__init__()
-        self.background_menu = BackgroundSprite("images/background_menu.jpg", self.window)
+        self.background_menu = BackgroundSprite("images/interface/background_menu.jpg", self.window)
         self.background = SpriteList()
         self.background.append(self.background_menu)
 
@@ -71,7 +72,7 @@ class StartMenu(arcade.View):
         text = UILabel(text="ᗣᖇᙅᗣᙏᗣZᙓ", font_size=80, text_color=arcade.color.WHITE, width=300,
                        align="center")
         self.box_layout.add(text)
-        texture_normal = arcade.load_texture("images/start_game_button_2.jpg")
+        texture_normal = arcade.load_texture("images/interface/start_game_button_2.jpg")
         texture_button = UITextureButton(texture=texture_normal, width=300, height=150)
         texture_button.on_click = """TODO"""
         self.box_layout.add(texture_button)
@@ -88,14 +89,243 @@ class Character:
         self.x = x
         self.y = y
 
+class Mobs:
+    def __init__(self, name, hp, damage, speed, x, y, picture: arcade.Sprite, type="good"):
+        global LEVEL
+        self.name = name
+        self.hp = hp
+        self.damage = damage
+        self.speed = speed
+        self.x = x
+        self.y = y
+        self.texture = picture
+        self.type = type
+        self.max_hp = hp
+
+        self.state = "idle"  # idle, patrol, chase, flee, attack, return
+        self.target_x = x
+        self.target_y = y
+        self.home_x = x  # Дом/спавн точка
+        self.home_y = y
+        self.angle = 0  # Направление взгляда
+
+        self.detection_range = 300  # Дистанция обнаружения игрока
+        self.attack_range = 50  # Дистанция атаки
+        self.flee_range = 200  # Дистанция для бегства
+        self.patrol_range = 150  # Радиус патрулирования
+
+        self.state_timer = 0
+        self.attack_cooldown = 0
+        self.idle_time = random.uniform(1, 3)
+
+        self.patrol_points = []
+        self.current_patrol_point = 0
+        self.generate_patrol_points()
+
+        # Для нейтральных мобов
+        self.was_attacked = False
+        self.aggression_timer = 0
+
+        # Визуальные эффекты
+        self.hit_timer = 0
+        self.is_hit = False
+
+        # Размер для коллизий
+        self.radius = 20
+
+
+
+        if self.type == "good":
+            self.STATE_IDLE = 0  # Стоит на месте
+            self.STATE_WALKING = 1  # Идет
+            self.STATE_WAITING = 2  # Короткая пауза
+
+            self.state_timer = 0
+            self.idle_time = random.uniform(1, 3)  # Время бездействия
+            self.walk_time = random.uniform(3, 7)  # Время ходьбы
+            self.wait_time = random.uniform(0.5, 2)  # Время ожидания
+            self.walk_direction = None
+            self.walk_speed = 2
+
+    def generate_patrol_points(self):
+        if self.type == "good":
+            return
+
+        num_points = random.randint(3, 5)
+        self.patrol_points = []
+
+        for i in range(num_points):
+            angle = (i / num_points) * 2 * math.pi
+            distance = random.uniform(self.patrol_range * 0.5, self.patrol_range)
+
+            px = self.home_x + math.cos(angle) * distance
+            py = self.home_y + math.sin(angle) * distance
+
+            self.patrol_points.append((px, py))
+
+        if self.patrol_points:
+            self.target_x, self.target_y = self.patrol_points[0]
+
+    def update(self, delta_time, player_x, player_y, walls=None):
+
+        self.state_timer -= delta_time
+        self.attack_cooldown -= delta_time
+        self.hit_timer -= delta_time
+
+        if self.hit_timer <= 0:
+            self.is_hit = False
+
+        if self.type == "aggressive":
+            self.update_aggressive(delta_time, player_x, player_y, walls)
+        elif self.type == "good":
+            self.update_good(delta_time, player_x, player_y, walls)
+
+        self.move_towards_target(delta_time, walls)
+
+        dx = self.target_x - self.x
+        dy = self.target_y - self.y
+        if dx != 0 or dy != 0:
+            self.angle = math.degrees(math.atan2(dy, dx))
+
+    def update_aggressive(self, delta_time, player_x, player_y, walls):
+        distance_to_player = math.sqrt((self.x - player_x) ** 2 + (self.y - player_y) ** 2)
+
+        if distance_to_player <= self.detection_range:
+            if distance_to_player <= self.attack_range:
+                self.state = "attack"
+                self.attack_player(player_x, player_y)
+            else:
+                self.state = "chase"
+                self.target_x = player_x
+                self.target_y = player_y
+        else:
+
+            if self.state != "patrol" and self.state != "idle":
+                self.state = "return"
+                self.target_x = self.home_x
+                self.target_y = self.home_y
+
+            if self.state == "return":
+                distance_home = math.sqrt((self.x - self.home_x) ** 2 + (self.y - self.home_y) ** 2)
+                if distance_home < 10:
+                    self.state = "idle"
+                    self.state_timer = self.idle_time
+            if self.state == "idle" and self.state_timer <= 0:
+                self.state = "patrol"
+                self.set_next_patrol_point()
+
+            if self.state == "patrol":
+                distance_target = math.sqrt((self.x - self.target_x) ** 2 + (self.y - self.target_y) ** 2)
+                if distance_target < 10:
+                    self.set_next_patrol_point()
+
+    def update_good(self, delta_time, player_x, player_y, walls):
+        distance_to_player = math.sqrt((self.x - player_x) ** 2 + (self.y - player_y) ** 2)
+
+        if distance_to_player < 100:
+            self.state = "flee"
+            dx = self.x - player_x
+            dy = self.y - player_y
+            length = math.sqrt(dx * dx + dy * dy)
+            if length > 0:
+                dx /= length
+                dy /= length
+
+            self.target_x = self.x + dx * 50
+            self.target_y = self.y + dy * 50
+        else:
+            self.state = "return"
+            self.target_x = self.home_x
+            self.target_y = self.home_y
+
+    def set_next_patrol_point(self):
+        if not self.patrol_points:
+            return
+
+        self.current_patrol_point = (self.current_patrol_point + 1) % len(self.patrol_points)
+        self.target_x, self.target_y = self.patrol_points[self.current_patrol_point]
+
+    def move_towards_target(self, delta_time, walls):
+        dx = self.target_x - self.x
+        dy = self.target_y - self.y
+        distance = math.sqrt(dx * dx + dy * dy)
+
+        if distance > 0:
+            dx /= distance
+            dy /= distance
+
+            move_distance = min(distance, self.speed * delta_time * 60)  # *60 для FPS 60
+
+            new_x = self.x + dx * move_distance
+            new_y = self.y + dy * move_distance
+
+            if walls and self.check_collision_with_walls(new_x, new_y, walls):
+                if abs(dx) > abs(dy):
+                    if not self.check_collision_with_walls(self.x, new_y, walls):
+                        self.y = new_y
+                    elif not self.check_collision_with_walls(new_x, self.y, walls):
+                        self.x = new_x
+                else:
+                    if not self.check_collision_with_walls(new_x, self.y, walls):
+                        self.x = new_x
+                    elif not self.check_collision_with_walls(self.x, new_y, walls):
+                        self.y = new_y
+            else:
+                self.x = new_x
+                self.y = new_y
+
+    def check_collision_with_walls(self, x, y, walls):
+        if callable(walls):
+            return not walls(x, y, self.radius)
+        elif isinstance(walls, list):
+            for wall in walls:
+                if hasattr(wall, 'collides_with'):
+                    if wall.collides_with(x, y, self.radius):
+                        return True
+        return False
+
+    def attack_player(self, player_x, player_y):
+        if self.attack_cooldown <= 0:
+            self.attack_cooldown = 1.0
+            return self.damage
+        return 0
+
+    def take_damage(self, damage):
+        self.hp -= damage
+        self.is_hit = True
+        self.hit_timer = 0.3
+
+        if self.hp <= 0:
+            return True
+        return False
+
+    def draw(self, camera_x=0, camera_y=0):
+        if self.hp < self.max_hp:
+            hp_percent = self.hp / self.max_hp
+            hp_width = self.radius * 2 * hp_percent
+            arcade.draw_rect_filled(arcade.LBWH(SCREEN_WIDTH, SCREEN_HEIGHT + self.radius + 10,
+                                         self.radius * 2, 6), arcade.color.BLACK)
+            hp_color = arcade.color.GREEN
+            if hp_percent < 0.5:
+                hp_color = arcade.color.YELLOW
+            if hp_percent < 0.25:
+                hp_color = arcade.color.RED
+
+            arcade.draw_rect_filled(arcade.LBWH(SCREEN_WIDTH - self.radius + hp_width / 2,
+                                         SCREEN_HEIGHT + self.radius + 10,
+                                         hp_width, 4), hp_color)
+
 
 class Item:  # предмет класс
-    def __init__(self, name, item_type, texture, quantity=1, value=1):
+    def __init__(self, name, item_type, texture, quantity=1, heal=0, damage=0, defence=0):
         self.name = name
         self.type = item_type
         self.texture = texture
         self.quantity = quantity
-        self.value = value
+        self.heal = heal
+        self.damage = damage
+        self.defence = defence
+
         self.x = 0
         self.y = 0
         self.world_x = 0  # Глобальные координаты на карте
@@ -117,7 +347,6 @@ class Item:  # предмет класс
     def set_position(self, world_x, world_y):
         self.world_x = world_x
         self.world_y = world_y
-        # Для обратной совместимости
         self.x = world_x
         self.y = world_y
 
@@ -154,13 +383,23 @@ class Game(arcade.View):
         global SCREEN_HEIGHT, SCREEN_WIDTH
         SCREEN_HEIGHT = self.window.height
         SCREEN_WIDTH = self.window.width
-        self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite("""TODO"""), speed=30)
+        self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite("""TODO"""), speed=30, x=0, y=0)
         self.inventory_slots = 4
         self.inventory = [None] * self.inventory_slots
         self.selected_slot = 0
         self.slot_color = arcade.color.GRAY
         self.selected_slot_color = arcade.color.GOLD
         self.camera = Camera()
+        self.mobs = []
+        self.create_mobs()
+
+        self.total_mobs_to_spawn = 20  # Общее количество мобов на карте
+        self.mob_spawn_rate = 0.02  # Шанс спавна моба за кадр
+        self.min_mob_distance_from_player = 200  # Минимальное расстояние от игрока
+        self.max_spawn_attempts = 50  # Максимальное количество попыток спавна
+        self.mob_database = self.create_mob_database()
+        self.mobs = []
+        self.spawn_initial_mobs(10)
 
         self.item_database = self.create_item_database()
         self.items_on_map = []
@@ -182,33 +421,97 @@ class Game(arcade.View):
         self.last_y = self.gamer.y
 
     def create_item_database(self):
-        return [{"name": "Меч", "type": "weapon", "texture": """TODO""", "min_qty": 1, "max_qty": 1,
-                 "power": 5},
-                {"name": "Нож", "type": "weapon", "texture": """TODO""", "min_qty": 1, "max_qty": 2,
-                 "power": 3},
-                {"name": "Щит", "type": "defense", "texture": """TODO""", "min_qty": 0, "max_qty": 1,
-                 "def": 5},
-                {"name": "Каменный молоток", "type": "weapon", "texture": """TODO""", "min_qty": 0, "max_qty": 2,
-                 "power": 4},
-                {"name": "Железный молоток", "type": "weapon", "texture": """TODO""", "min_qty": 0, "max_qty": 1,
-                 "power": 6},
-                {"name": "Топор", "type": "weapon", "texture": """TODO""", "min_qty": 0, "max_qty": 1,
-                 "power": 10},
-                {"name": "Картофель", "type": "food", "texture": """TODO""", "min_qty": 2, "max_qty": 5,
-                 "heal": 4},
-                {"name": "Ягоды", "type": "food", "texture": """TODO""", "min_qty": 5, "max_qty": 8,
-                 "heal": 2},
-                {"name": "Яблоко", "type": "food", "texture": """TODO""", "min_qty": 2, "max_qty": 5,
-                 "heal": 3},
-                {"name": "Растение", "type": "food", "texture": """TODO""", "min_qty": 10, "max_qty": 15,
-                 "heal": 1},
-                {"name": "Тухлое мясо", "type": "food", "texture": """TODO""", "min_qty": 6, "max_qty": 8,
-                 "heal": random.randint(-10, 3)},
-                {"name": "Мясо", "type": "food", "texture": """TODO""", "min_qty": 0, "max_qty": 1,
-                 "heal": 10},
-                {"name": "Рыба", "type": "food", "texture": """TODO""", "min_qty": 0, "max_qty": 1,
-                 "heal": 10},
+        return [{"name": "Меч", "type": "weapon", "texture": arcade.Sprite("images/things/thing_sword.jpg"), "min_qty": 1, "max_qty": 1,
+                 "damage": 5, "heal": 0, "defence": 0},
+                {"name": "Нож", "type": "weapon", "texture": arcade.Sprite("images/things/thing_knife.jpg"), "min_qty": 1, "max_qty": 2,
+                 "damage": 3, "heal": 0, "defence": 0},
+                {"name": "Щит", "type": "defense", "texture": arcade.Sprite("images/things/thing_shield.jpg"), "min_qty": 0, "max_qty": 1,
+                 "defence": 5, "heal": 0, "damage": 0},
+                {"name": "Каменный молоток", "type": "weapon", "texture": arcade.Sprite("images/things/thing_stone_molotok.jpg"), "min_qty": 0, "max_qty": 2,
+                 "damage": 4, "heal": 0, "defence": 0},
+                {"name": "Железный молоток", "type": "weapon", "texture": arcade.Sprite("images/things/thing_iron_molotok.jpg"), "min_qty": 0, "max_qty": 1,
+                 "damage": 6, "heal": 0, "defence": 0},
+                {"name": "Топор", "type": "weapon", "texture": arcade.Sprite("images/things/thing_axe.jpg"), "min_qty": 0, "max_qty": 1,
+                 "damage": 10, "heal": 0, "defence": 0},
+                {"name": "Картофель", "type": "food", "texture": arcade.Sprite("images/food/food_potato.jpg"), "min_qty": 2, "max_qty": 5,
+                 "heal": 4, "defence": 0, "damage": 0},
+                {"name": "Ягоды", "type": "food", "texture": arcade.Sprite("images/food/food_berries.jpg"), "min_qty": 5, "max_qty": 8,
+                 "heal": 2, "defence": 0, "damage": 0},
+                {"name": "Яблоко", "type": "food", "texture": arcade.Sprite("images/food/food_apple.jpg"), "min_qty": 2, "max_qty": 5,
+                 "heal": 3, "defence": 0, "damage": 0},
+                {"name": "Растение", "type": "food", "texture": arcade.Sprite("images/food/food_grass.jpg"), "min_qty": 10, "max_qty": 15,
+                 "heal": 1, "defence": 0, "damage": 0},
+                {"name": "Тухлое мясо", "type": "food", "texture": arcade.Sprite("images/food/food_bad_meat.jpg"), "min_qty": 6, "max_qty": 8,
+                 "heal": random.randint(-10, 3), "defence": 0, "damage": 0},
+                {"name": "Мясо", "type": "food", "texture": arcade.Sprite("images/food/food_meet.jpg"), "min_qty": 0, "max_qty": 1,
+                 "heal": 10, "defence": 0, "damage": 0},
+                {"name": "Рыба", "type": "food", "texture": arcade.Sprite("images/food/food_fish.jpg"), "min_qty": 0, "max_qty": 1,
+                 "heal": 10, "defence": 0, "damage": 0},
                 ]
+
+    def create_mob_database(self):
+        return [{"name": "Овечка", "hp": 50, "damage": 0, "speed": 10, "texture": arcade.Sprite(), "type": "good"},
+                {"name": "Рогач", "hp": 80, "damage": 0, "speed": 30, "texture": arcade.Sprite(), "type": "good"},
+                {"name": "Падальщик", "hp": 110, "damage": 0, "speed": 50, "texture": arcade.Sprite(), "type": "agressive"},
+                {"name": "Краб", "hp": 200, "damage": 0, "speed": 70, "texture": arcade.Sprite(), "type": "agressive"},
+                {"name": "Робот", "hp": 400, "damage": 0, "speed": 90, "texture": arcade.Sprite(), "type": "agressive"}]
+
+    def spawn_initial_mobs(self, count):
+        for _ in range(count):
+            if len(self.mobs) >= self.total_mobs_to_spawn:
+                break
+            self.spawn_random_mob()
+
+    def spawn_random_mob(self, max_attempts=50):
+        for attempt in range(max_attempts):
+            mob_data = random.choice(self.mob_database)
+            x, y = self.find_free_spawn_position()
+
+            if x is not None and y is not None:
+                mob = Mobs(
+                    name=mob_data["name"],
+                    hp=mob_data["hp"],
+                    damage=mob_data["damage"],
+                    speed=mob_data["speed"],
+                    x=x,
+                    y=y,
+                    picture=mob_data["texture"],
+                    type=mob_data["type"]
+                )
+
+                too_close_to_other_mob = False
+                for existing_mob in self.mobs:
+                    distance = math.sqrt((x - existing_mob.x) ** 2 + (y - existing_mob.y) ** 2)
+                    if distance < 100:
+                        too_close_to_other_mob = True
+                        break
+
+                if not too_close_to_other_mob:
+                    self.mobs.append(mob)
+                    return True
+        return False
+
+    def find_free_spawn_position(self):
+        attempts = 0
+        max_attempts = 100
+
+        while attempts < max_attempts:
+            x = random.randint(100, WORLD_WIDTH - 100)
+            y = random.randint(100, WORLD_HEIGHT - 100)
+
+            distance_to_player = math.sqrt((x - self.gamer.x) ** 2 + (y - self.gamer.y) ** 2)
+            if distance_to_player < self.min_mob_distance_from_player:
+                attempts += 1
+                continue
+
+            if hasattr(self, 'is_position_free') and callable(self.is_position_free):
+                if not self.is_position_free(world_x=x, world_y=y, radius=30):
+                    attempts += 1
+                    continue
+            return x, y
+
+        return None, None
+
 
     def generate_items_for_all_chunks(self):
         chunks_x = WORLD_WIDTH // self.chunk_size + 1
@@ -263,7 +566,9 @@ class Game(arcade.View):
             item_type=item_data["type"],
             texture=item_data["texture"],
             quantity=quantity,
-            value=item_data["value"]
+            heal=item_data["heal"],
+            defence=item_data["defence"],
+            damage=item_data["damage"],
         )
 
         return item
@@ -273,20 +578,17 @@ class Game(arcade.View):
         chunk_y = int(world_y // self.chunk_size)
         return chunk_x, chunk_y
 
-    def is_position_free(self, world_x, world_y, item_radius=16):
+    def is_position_free(self, world_x, world_y, radius=16):
         tile_x = int(world_x // TILE_SIZE)
         tile_y = int(world_y // TILE_SIZE)
 
-        #   позиция в пределах карты
         if not (0 <= tile_x < MAP_WIDTH and 0 <= tile_y < MAP_HEIGHT):
             return False
 
-        #   сам тайл
         if self.collision_list[tile_y][tile_x] == 1:
             return False
 
-        #   соседние тайлы (чтобы предмет не задел стену)
-        check_radius = max(1, int(item_radius // TILE_SIZE))
+        check_radius = max(1, int(radius // TILE_SIZE))
 
         for dx in range(-check_radius, check_radius + 1):
             for dy in range(-check_radius, check_radius + 1):
@@ -299,14 +601,13 @@ class Game(arcade.View):
                         dist_x = abs(world_x - (check_x * TILE_SIZE + TILE_SIZE // 2))
                         dist_y = abs(world_y - (check_y * TILE_SIZE + TILE_SIZE // 2))
 
-                        if dist_x < item_radius and dist_y < item_radius:
+                        if dist_x < radius and dist_y < radius:
                             return False
 
         return True
 
     def find_free_position(self, chunk_world_x, chunk_world_y, max_attempts=20):
         for attempt in range(max_attempts):
-            # позиция внутри чанка
             item_x = chunk_world_x + random.randint(50, self.chunk_size - 50)
             item_y = chunk_world_y + random.randint(50, self.chunk_size - 50)
 
@@ -317,7 +618,6 @@ class Game(arcade.View):
                 return item_x, item_y
 
         return None, None
-
 
     def on_key_press(self, key, modifiers):
         if arcade.key.KEY_1 <= key <= arcade.key.KEY_4:
@@ -338,8 +638,12 @@ class Game(arcade.View):
                 for i in range(self.inventory_slots):
                     if self.inventory[i] is None:
                         self.inventory[i] = self.item_on_ground
+                        self.gamer.defence += self.inventory[i].defence
+                        self.gamer.damage += self.inventory[i].damage
+                        self.gamer.hp += self.inventory[i].heal
                         self.item_on_ground = None
                         self.can_pick_up = False
+
 
         elif key == arcade.key.W:
             self.move_up = True
@@ -377,6 +681,12 @@ class Game(arcade.View):
             self.move_left = False
         elif key == arcade.key.RIGHT:
             self.move_right = False
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> bool | None:
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            if self.inventory[self.selected_slot] is not None and self.inventory[self.selected_slot].type is "food":
+                self.gamer.hp += self.inventory[self.selected_slot].heal
+
 
     def draw_inventory(self):  # инвентарь
         start_x = (self.window.width - (self.inventory_slots * (SLOT_SIZE + SLOT_MARGIN))) // 2
@@ -435,6 +745,12 @@ class Game(arcade.View):
             item_x, item_y = self.item_on_ground_pos
             distance = math.sqrt((self.gamer.x - item_x) ** 2 + (self.gamer.y - item_y) ** 2)
             self.can_pick_up = distance < 80
+
+        for mob in self.mobs[:]:
+            mob.update(delta_time, self.gamer.x, self.gamer.y, self.is_position_free)
+
+            if mob.hp <= 0:
+                self.mobs.remove(mob)
 
     def update_player(self):
         dx = 0
