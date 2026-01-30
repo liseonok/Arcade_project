@@ -20,6 +20,9 @@ WORLD_HEIGHT = MAP_HEIGHT * TILE_SIZE * TILE_SCALING  # 3072 пикселя
 CAMERA_SPEED = 0.1
 CAMERA_LERP = 0.12
 LEFT_CATCHING = 10
+LEVEL = 1
+DELTA_HP = 2
+DELTA_HUNGER = 0.05
 ITEMS = [{"name": "Картофель", "type": "food", "texture": "images/food/food_potato.jpg", "quantity": 5,
                  "heal": 4, "hunger": 2},
                 {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
@@ -225,6 +228,70 @@ class BackgroundSprite(arcade.Sprite):
         self.center_y = self.window.height // 2
 
 
+
+class Choose_level(arcade.View):
+    def __init__(self, level):
+        super().__init__()
+        self.ui = UIManager()
+        self.ui.enable()
+        self.level = level
+        global LEVEL, DELTA_HP, DELTA_HUNGER
+        self.show_dialog()
+
+    def show_dialog(self):
+        self.ui.clear()
+        alchor = UIAnchorLayout()
+        buttons = UIBoxLayout(vertical=False, space_between=10)
+
+        btn1 = UITextureButton(texture=arcade.load_texture("images/interface/1.jpg"), scale=0.4,
+                               texture_hovered=arcade.load_texture("images/interface/1_hovered.jpg"),
+                               texture_pressed=arcade.load_texture("images/interface/1_pressed.jpg"),)
+        btn2 = UITextureButton(texture=arcade.load_texture("images/interface/2.jpg"), scale=0.4,
+                               texture_hovered=arcade.load_texture("images/interface/2_hovered.jpg"),
+                               texture_pressed=arcade.load_texture("images/interface/2_pressed.jpg"),)
+        btn3 = UITextureButton(texture=arcade.load_texture("images/interface/3.jpg"), scale=0.2,
+                               texture_hovered=arcade.load_texture("images/interface/3_hovered.jpg"),
+                               texture_pressed=arcade.load_texture("images/interface/3_pressed.jpg"),)
+        buttons.add(btn1)
+        buttons.add(btn2)
+        buttons.add(btn3)
+        alchor.add(buttons)
+        self.ui.add(alchor)
+        btn1.on_click = self.one
+        btn2.on_click = self.two
+        btn3.on_click = self.three
+
+    def one(self, *args):
+        global LEVEL, DELTA_HP, DELTA_HUNGER
+        LEVEL = 1
+        DELTA_HP = 2
+        DELTA_HUNGER = 0.05
+        self.window.show_view(self.level)
+        return True
+
+    def two(self, *args):
+        global LEVEL, DELTA_HP, DELTA_HUNGER
+        LEVEL = 2
+        DELTA_HP = 5
+        DELTA_HUNGER = 0.1
+        self.window.show_view(self.level)
+
+    def three(self, *args):
+        global LEVEL, DELTA_HP, DELTA_HUNGER
+        LEVEL = 3
+        DELTA_HP = 7
+        DELTA_HUNGER = 0.2
+        self.window.show_view(self.level)
+
+    def on_draw(self):
+        self.clear()
+        self.ui.draw()
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            self.window.show_view(self.level)
+
+
 class StartMenu(arcade.View):
 
     def __init__(self):
@@ -274,6 +341,11 @@ class StartMenu(arcade.View):
         self.box_layout.add(sign_up)
 
         create_game.on_click = self.button_press
+        choose_level.on_click = self.choose_level_fun
+
+    def choose_level_fun(self, *args):
+        window_view = Choose_level(self)
+        self.window.show_view(window_view)
 
     def button_press(self, *args, **kwargs):
         game_view = Game()
@@ -314,7 +386,7 @@ class GameOver(arcade.View):
 class Game(arcade.View):
     def __init__(self):
         super().__init__()
-        global LEFT_CATCHING
+        global LEFT_CATCHING, DELTA_HP, DELTA_HUNGER
 
         self.world_width = 96 * TILE_SIZE * TILE_SCALING
         self.world_height = 96 * TILE_SIZE * TILE_SCALING
@@ -493,9 +565,9 @@ class Game(arcade.View):
         self.player_sprite.change_y = 0
 
         if self.gamer.hungry == 0:
-            self.gamer.hp -= 0.02
+            self.gamer.hp -= DELTA_HP
         else:
-            self.gamer.hungry -= 0.002
+            self.gamer.hungry -= DELTA_HUNGER
 
         self.gamer.timer += delta_time
 

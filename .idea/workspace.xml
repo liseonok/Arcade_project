@@ -4,26 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="рабочая карта, вещички, начало инвентаря">
+    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_apple.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_apple.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_bad_meat.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_berries.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_berries.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_fish.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_fish.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_grass.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_grass.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_meet.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_meet.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/food/food_potato.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/food/food_potato.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/interface/inventory_text.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/interface/start_game_button_2.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_axe.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_iron_molotok.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_knife.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_shield.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_stone_molotok.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/things/thing_sword.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/map_arcamaze7.tmx" beforeDir="false" afterPath="$PROJECT_DIR$/map_arcamaze7.tmx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/карта_arcamaze.tmx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/interface/1_presssed.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/interface/1_pressed.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/interface/2_howered.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/interface/2_hovered.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -228,7 +213,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769668183002</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни">
+      <option name="closed" value="true" />
+      <created>1769733011880</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1769733011880</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -258,6 +251,7 @@
     <MESSAGE value="почти вся игра, добавила классы, осталась свзяь, все картинки" />
     <MESSAGE value="картинки и мобы" />
     <MESSAGE value="рабочая карта, вещички, начало инвентаря" />
-    <option name="LAST_COMMIT_MESSAGE" value="рабочая карта, вещички, начало инвентаря" />
+    <MESSAGE value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
+    <option name="LAST_COMMIT_MESSAGE" value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
   </component>
 </project>
