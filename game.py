@@ -22,7 +22,8 @@ CAMERA_LERP = 0.12
 LEFT_CATCHING = 10
 LEVEL = 1
 DELTA_HP = 2
-DELTA_HUNGER = 0.05
+DELTA_HUNGER = 0.000000000001
+TOTAL_TIME = 0
 ITEMS = [{"name": "Картофель", "type": "food", "texture": "images/food/food_potato.jpg", "quantity": 5,
                  "heal": 4, "hunger": 2},
                 {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
@@ -130,7 +131,7 @@ class Inventory_View(arcade.View):
         x2.add(hunger)
         x2.add(label_hunger)
         self.v_box.add(x2)
-        label_time = UILabel(text="15", text_color=(0, 0, 0))
+        label_time = UILabel(text=f"{int(TOTAL_TIME)}", text_color=(0, 0, 0))
         x3 = UIBoxLayout(vertical=False, space_between=20)
         x3.add(time)
         x3.add(label_time)
@@ -200,6 +201,9 @@ class Inventory_View(arcade.View):
 
         elif symbol == arcade.key.KEY_4:
             self.selected_slot = 4
+
+        elif symbol == arcade.key.ESCAPE:
+            self.window.show_view(self.game_view)
 
         self.setup_widgets()
 
@@ -378,9 +382,34 @@ class Item:  # предмет класс
 class GameOver(arcade.View):
     def __init__(self):
         super().__init__()
+        self.ui_manager = UIManager()
+        self._background_color = arcade.color.CARMINE_RED
+
+    def setup(self):
+        y1 = UILabel(text='Вы проиграли', font_size=80, text_color=arcade.color.BLACK,)
+        x2 = UILabel(text=f"Общее время в игре: {int(TOTAL_TIME)}", font_size=80, text_color=arcade.color.BLACK,)
+        x1 = UITextureButton(texture=arcade.load_texture("images/interface/leave.jpg"), scale=0.5,
+                             texture_hovered=arcade.load_texture("images/interface/leave_hovered.jpg"),
+                             texture_pressed=arcade.load_texture("images/interface/leave_pressed.jpg"))
+        x1.on_click = self.leave
+        y2 = UIBoxLayout(vertical=True, space_between=20)
+        y2.add(y1)
+        y2.add(x1)
+        y2.add(x2)
+        self.ui_manager.add(y2)
+
+    def leave(self, *args):
+        global TOTAL_TIME, INVENTORY
+        GAMER.hp = 100
+        GAMER.hungry = 100
+        TOTAL_TIME = 0
+        INVENTORY = Inventory()
+        start_window = StartMenu()
+        self.window.show_view(start_window)
 
     def on_draw(self) -> bool | None:
         self.clear()
+        self.ui_manager.draw()
 
 
 class Game(arcade.View):
@@ -411,7 +440,6 @@ class Game(arcade.View):
         map_name = "map_arcamaze7.tmx"
         try:
             tile_map = arcade.load_tilemap(map_name, scaling=TILE_SCALING)
-            print(tile_map)
             if tile_map is None:
                 raise ValueError("Не удалось загрузить карту")
         except Exception as e:
@@ -491,15 +519,12 @@ class Game(arcade.View):
             for j in range(max_try):
                 item.texture.center_x = random.randint(0, self.world_width * TILE_SCALING * TILE_SIZE)
                 item.texture.center_y = random.randint(0, self.world_height * TILE_SCALING * TILE_SIZE)
-                print(arcade.check_for_collision_with_list(item.texture, self.collision_list))
                 if in_square(item.texture.center_x, item.texture.center_y) and not arcade.check_for_collision_with_list(item.texture,
                                                                                                       self.collision_list)\
                         and item.texture not in self.items_sprite_list:
                     self.items_sprite_list.append(item.texture)
                     self.collection.append(item)
                     self.items[num]["quantity"] -= 1
-                    # print(item.texture.center_x, item.texture.center_y)
-                    # print(item.name, item.quantity) #debug
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
@@ -555,7 +580,8 @@ class Game(arcade.View):
 
 
     def on_update(self, delta_time: float) -> bool | None:
-        global LEFT_CATCHING
+        global LEFT_CATCHING, TOTAL_TIME
+        delta_x = 32
         if self.gamer.hp <= 0:
             game_over = GameOver()
             self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", scale=0.5), speed=5, x=self.world_width//2, y=self.world_height//2)
@@ -563,13 +589,14 @@ class Game(arcade.View):
 
         self.player_sprite.change_x = 0
         self.player_sprite.change_y = 0
+        TOTAL_TIME += delta_time
 
-        if self.gamer.hungry == 0:
-            self.gamer.hp -= DELTA_HP
-        else:
-            self.gamer.hungry -= DELTA_HUNGER
-
-        self.gamer.timer += delta_time
+        if int(TOTAL_TIME) % delta_x == 0:
+            if self.gamer.hungry == 0:
+                self.gamer.hp = int(self.gamer.hp - DELTA_HUNGER)
+            else:
+                if self.gamer.hungry > 0:
+                    self.gamer.hungry = int(self.gamer.hungry - DELTA_HUNGER)
 
         speed = self.gamer.speed
 
