@@ -2,16 +2,12 @@ import math
 import random
 
 import arcade
+from PIL.ImageOps import scale
 from arcade import SpriteList
 from arcade.examples.camera_platform import TILE_SCALING
 from arcade.gui import UIManager, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from pyglet.graphics import Batch
-from pyglet.resource import texture
 
-SLOT_SIZE = 64
-SLOT_MARGIN = 10
-INVENTORY_Y = 50
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 1200
 # Константы карты
@@ -23,14 +19,22 @@ WORLD_WIDTH = MAP_WIDTH * TILE_SIZE * TILE_SCALING  # 3072 пикселя
 WORLD_HEIGHT = MAP_HEIGHT * TILE_SIZE * TILE_SCALING  # 3072 пикселя
 CAMERA_SPEED = 0.1
 CAMERA_LERP = 0.12
-
-MAX_ITEMS_ON_MAP = 100  # Максимум предметов на всей карте
-ITEM_SPAWN_RATE = 0.05  # Шанс появления предмета за кадр
-PICKUP_DISTANCE = 60
-MIN_ITEMS_PER_CHUNK = 1  # Минимум предметов в чанке
-MAX_ITEMS_PER_CHUNK = 5  # Максимум предметов в чанке
-LEVEL = 1
-
+LEFT_CATCHING = 10
+ITEMS = [{"name": "Картофель", "type": "food", "texture": "images/food/food_potato.jpg", "quantity": 5,
+                 "heal": 4, "hunger": 2},
+                {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
+                 "heal": 2, "hunger": - 1},
+                {"name": "Яблоко", "type": "food", "texture": "images/food/food_apple.jpg", "quantity": 5,
+                 "heal": 3, "hunger": - 3},
+                {"name": "Растение", "type": "food", "texture": "images/food/food_grass.jpg", "quantity": 15,
+                 "heal": 1, "hunger": -4},
+                {"name": "Тухлое мясо", "type": "food", "texture": "images/food/food_bad_meet.jpg", "quantity": 8,
+                 "heal": random.randint(-10, 3), "hunger": 2},
+                {"name": "Мясо", "type": "food", "texture": "images/food/food_meet.jpg", "quantity": 1,
+                 "heal": 10, "hunger": 10},
+                {"name": "Рыба", "type": "food", "texture": "images/food/food_fish.jpg", "quantity": 1,
+                 "heal": 10, "hunger": 10},
+                ]
 
 class Character:
     def __init__(self, name, hp, damage, defense, speed, x, y, picture):
@@ -43,31 +47,168 @@ class Character:
         self.x = x
         self.y = y
         self.hungry = 100
+        self.timer = 0
 
-GAMER = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", scale=0.5), speed=5, x=WORLD_WIDTH//2, y=WORLD_HEIGHT//2)
+GAMER = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", scale=0.5), speed=5, x=WORLD_WIDTH//2, y=WORLD_HEIGHT//2)
+
+
+class Inventory:
+    def __init__(self):
+        self.free_slots = ["Empty" for _ in range(4)]
+
+    def remove_from_invent(self, pos):
+        self.free_slots[pos] = "Empty"
+
+    def add_to_invent(self, pos, item):
+        self.free_slots[pos] = item
+
+
+INVENTORY = Inventory()
 
 
 class Inventory_View(arcade.View):
-    def __init__(self):
+    def __init__(self, game_view):
         super().__init__()
-        self.picture = arcade.Sprite("images/interface/inventory_text.jpg", scale=0.5)
-        self.picture.center_x = self.window.width // 2
-        self.picture.center_y = self.window.height - 100
-        self.load = arcade.SpriteList()
-        self.load.append(self.picture)
-        self.batch = Batch()
-        self.hp_text = arcade.Text(text=f"{GAMER.hp}", x=WORLD_WIDTH//2, y=WORLD_HEIGHT - 200, batch=self.batch, font_size=50)
-        self.hungry_text = arcade.Text(text=f"{GAMER.hungry}", x=WORLD_WIDTH//2, y=WORLD_HEIGHT - 300, batch=self.batch, font_size=50)
+        self.game_view = game_view
+        self.screen_width = self.window.width
+        self.screen_height = self.window.height
+        self.selected_slot = 2
+        self.ui_manager = UIManager()
+        self.ui_manager.enable()
+        self.setup_widgets()
+        self.background_color = arcade.color.COOL_GREY
+
+    def setup_widgets(self):
+        self.ui_manager.clear()
+        self.v_box = UIBoxLayout(vertical=True, space_between=10, x=200,
+                                 y=self.screen_height // 2 - self.screen_height // 2 * 0.5)
+        self.v_box_2 = UIBoxLayout(vertical=True, space_between=10, x=self.screen_width // 2,
+                                   y=self.screen_height // 2 - self.screen_height // 2 * 0.5)
+        hp = UITextureButton(texture=arcade.load_texture("images/interface/hp.jpg"), scale=0.3)
+        hunger = UITextureButton(texture=arcade.load_texture("images/interface/hunger.jpg"), scale=0.3)
+        eat = UITextureButton(texture=arcade.load_texture("images/interface/eat.jpg"), scale=0.3,
+                              texture_hovered=arcade.load_texture("images/interface/eat_hovered.jpg"),
+                              texture_pressed=arcade.load_texture("images/interface/eat_pressed.jpg"))
+        time = UITextureButton(texture=arcade.load_texture("images/interface/time.jpg"), scale=0.3)
+        left = UITextureButton(texture=arcade.load_texture("images/interface/left.jpg"), scale=0.3)
+        if self.selected_slot == 1:
+            slot_1_texture = arcade.load_texture("images/interface/1_slot_chosen.jpg")
+        else:
+            slot_1_texture = arcade.load_texture("images/interface/1_slot.jpg")
+        slot1 = UITextureButton(texture=slot_1_texture,
+                                scale=0.2)
+        if self.selected_slot == 2:
+            slot_2_texture = arcade.load_texture("images/interface/2_slot_chosen.jpg")
+        else:
+            slot_2_texture = arcade.load_texture("images/interface/2_slot.jpg")
+        slot2 = UITextureButton(texture=slot_2_texture,
+                                scale=0.2)
+        if self.selected_slot == 3:
+            slot_3_texture = arcade.load_texture("images/interface/3_slot_chosen.jpg")
+        else:
+            slot_3_texture = arcade.load_texture("images/interface/3_slot.jpg")
+        slot3 = UITextureButton(texture=slot_3_texture,
+                                scale=0.2)
+        if self.selected_slot == 4:
+            slot_4_texture = arcade.load_texture("images/interface/4_slot_chosen.jpg")
+        else:
+            slot_4_texture = arcade.load_texture("images/interface/4_slot.jpg")
+        slot4 = UITextureButton(texture=slot_4_texture,
+                                scale=0.2)
+
+
+        label_hp = UILabel(text=f"{GAMER.hp}/100", text_color=(0, 0, 0))
+        x1 = UIBoxLayout(vertical=False, space_between=20)
+        x1.add(hp)
+        x1.add(label_hp)
+        self.v_box.add(x1)
+        label_hunger = UILabel(text=f"{GAMER.hungry}/100", text_color=(0, 0, 0))
+        x2 = UIBoxLayout(vertical=False, space_between=20)
+        x2.add(hunger)
+        x2.add(label_hunger)
+        self.v_box.add(x2)
+        label_time = UILabel(text="15", text_color=(0, 0, 0))
+        x3 = UIBoxLayout(vertical=False, space_between=20)
+        x3.add(time)
+        x3.add(label_time)
+        self.v_box.add(x3)
+        label1 = UILabel(text=INVENTORY.free_slots[0], text_color=(0, 0, 0))
+        y1 = UIBoxLayout(vertical=False, space_between=20)
+        y1.add(slot1)
+        y1.add(label1)
+        self.v_box_2.add(y1)
+        label2= UILabel(text=INVENTORY.free_slots[1], text_color=(0, 0, 0))
+        y2 = UIBoxLayout(vertical=False, space_between=20)
+        y2.add(slot2)
+        y2.add(label2)
+        self.v_box_2.add(y2)
+        label3 = UILabel(text=INVENTORY.free_slots[2], text_color=(0, 0, 0))
+        y3 = UIBoxLayout(vertical=False, space_between=20, text_color=(255, 255, 255))
+        y3.add(slot3)
+        y3.add(label3)
+        self.v_box_2.add(y3)
+        label4 = UILabel(text=INVENTORY.free_slots[3], text_color=(0, 0, 0))
+        y4 = UIBoxLayout(vertical=False, space_between=20)
+        y4.add(slot4)
+        y4.add(label4)
+        self.v_box_2.add(y4)
+        self.v_box.add(eat)
+        label_left = UILabel(text=f"{LEFT_CATCHING} / 10", text_color=(0, 0, 0))
+        x4 = UIBoxLayout(vertical=False, space_between=20)
+        x4.add(left)
+        x4.add(label_left)
+        self.v_box.add(x4)
+
+        eat.on_click = self.do_stuff
+
+        self.ui_manager.add(self.v_box)
+        self.ui_manager.add(self.v_box_2)  # Всё в manager
+
+    def do_stuff(self, *args):
+        if INVENTORY.free_slots[self.selected_slot - 1] != "Empty":
+            INVENTORY.free_slots[self.selected_slot - 1] = "Empty"
+            sound1 = arcade.load_sound("sounds/eating.mp3")
+            sound1.play()
+            for elem in ITEMS:
+                if elem["name"] == INVENTORY.free_slots[self.selected_slot - 1]:
+                    GAMER.hp += elem["heal"]
+                    GAMER.hungry += elem["hunger"]
+        else:
+            sound2 = arcade.load_sound("sounds/loser.mp3")
+            sound2.play()
+        self.setup_widgets()
+        return
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
-            game_view = Game()
-            self.window.show_view(game_view)
+            self.window.show_view(self.game_view)
+
+        elif symbol == arcade.key.Q:
+            INVENTORY.remove_from_invent(self.selected_slot - 1)
+
+        elif symbol == arcade.key.KEY_1:
+            self.selected_slot = 1
+
+        elif symbol == arcade.key.KEY_2:
+            self.selected_slot = 2
+
+        elif symbol == arcade.key.KEY_3:
+            self.selected_slot = 3
+
+        elif symbol == arcade.key.KEY_4:
+            self.selected_slot = 4
+
+        self.setup_widgets()
+
+    def on_resize(self, width: int, height: int) -> bool | None:
+        self.screen_width = width
+        self.screen_height = height
+        self.setup_widgets()
+        return True
 
     def on_draw(self):
         self.clear()
-        self.load.draw()
-        self.batch.draw()
+        self.ui_manager.draw()
 
 
 class BackgroundSprite(arcade.Sprite):
@@ -112,13 +253,27 @@ class StartMenu(arcade.View):
         self.manager.draw()
 
     def setup_widgets(self):
-        text = UILabel(text="ᗣᖇᙅᗣᙏᗣZᙓ", font_size=80, text_color=arcade.color.WHITE, width=300,
+        text = UILabel(text="ᗣᖇᙅᗣᙏᗣZᙓ", font_size=80, text_color=arcade.color.MODE_BEIGE, width=300,
                        align="center")
         self.box_layout.add(text)
-        texture_normal = arcade.load_texture("images/interface/start_game_button_2.jpg")
-        texture_button = UITextureButton(texture=texture_normal, width=300, height=150)
-        texture_button.on_click = self.button_press
-        self.box_layout.add(texture_button)
+        create_game = UITextureButton(texture=arcade.load_texture("images/interface/create_game.jpg"), scale=0.5,
+                                      texture_hovered=arcade.load_texture("images/interface/create_game_hovered.jpg"),
+                                      texture_pressed=arcade.load_texture("images/interface/create_game_pressed.jpg"))
+        choose_level = UITextureButton(texture=arcade.load_texture("images/interface/choose_level.jpg"), scale=0.5,
+                                       texture_hovered=arcade.load_texture("images/interface/choose_level_hovered.jpg"),
+                                       texture_pressed=arcade.load_texture("images/interface/choose_level_pressed.jpg"))
+        lid_tab = UITextureButton(texture=arcade.load_texture("images/interface/lid_tab.jpg"), scale=0.5,
+                                  texture_hovered=arcade.load_texture("images/interface/lid_tab_hovered.jpg"),
+                                  texture_pressed=arcade.load_texture("images/interface/lid_tab_pressed.jpg"))
+        sign_up = UITextureButton(texture=arcade.load_texture("images/interface/sign_up.jpg"), scale=0.5,
+                                  texture_hovered=arcade.load_texture("images/interface/sign_up_hovered.jpg"),
+                                  texture_pressed=arcade.load_texture("images/interface/sign_up_pressed.jpg"))
+        self.box_layout.add(create_game)
+        self.box_layout.add(choose_level)
+        self.box_layout.add(lid_tab)
+        self.box_layout.add(sign_up)
+
+        create_game.on_click = self.button_press
 
     def button_press(self, *args, **kwargs):
         game_view = Game()
@@ -127,33 +282,19 @@ class StartMenu(arcade.View):
 
 
 class Item:  # предмет класс
-    def __init__(self, name, item_type, texture, quantity=1, heal=0, damage=0, defence=0):
+    def __init__(self, name, item_type, texture, quantity=1, heal=0, hunger=0):
         self.name = name
         self.type_st = item_type
         self.texture = texture
         self.quantity = quantity
         self.heal = heal
-        self.damage = damage
-        self.defence = defence
+        self.hunger = hunger
         self.inventory_position = None
 
         self.x = 0
         self.y = 0
         self.world_x = 0  # Глобальные координаты на карте
         self.world_y = 0
-
-    def draw(self, camera_x, camera_y):
-        screen_x = self.world_x - camera_x
-        screen_y = self.world_y - camera_y
-
-        if (-SLOT_SIZE <= screen_x <= SCREEN_WIDTH + SLOT_SIZE and
-                -SLOT_SIZE <= screen_y <= SCREEN_HEIGHT + SLOT_SIZE):
-
-            arcade.draw_texture_rect(self.texture, arcade.LBWH(screen_x, screen_y, SLOT_SIZE - 10, SLOT_SIZE - 10))
-
-            if self.quantity > 1:
-                arcade.draw_text(f"{self.quantity}", screen_x + 15, screen_y - 25,
-                                 arcade.color.WHITE, 14, bold=True)
 
     def set_position(self, world_x, world_y):
         self.world_x = world_x
@@ -173,6 +314,7 @@ class GameOver(arcade.View):
 class Game(arcade.View):
     def __init__(self):
         super().__init__()
+        global LEFT_CATCHING
 
         self.world_width = 96 * TILE_SIZE * TILE_SCALING
         self.world_height = 96 * TILE_SIZE * TILE_SCALING
@@ -212,6 +354,18 @@ class Game(arcade.View):
         self.pos2 = tile_map.sprite_lists["plants and else2"]
         self.pos3 = tile_map.sprite_lists["plants and else3"]
 
+        self.to_win_list = arcade.SpriteList()
+        k = 0
+        while k != 10:
+            win = arcade.Sprite(arcade.load_texture("images/things/to_win.jpg"), scale=0.1)
+            win.center_x = arcade.math.rand_in_circle((WORLD_WIDTH // 2, WORLD_HEIGHT // 2), WORLD_WIDTH // 2)[0]
+            win.center_y = arcade.math.rand_in_circle((WORLD_WIDTH // 2, WORLD_HEIGHT // 2), WORLD_HEIGHT // 2)[1]
+            if not arcade.check_for_collision_with_list(win, self.collision_list):
+                self.to_win_list.append(win)
+                k += 1
+
+        self.left = 10
+
         self.player_sprite = self.gamer.picture
         self.player_sprite.center_x = self.gamer.x
         self.player_sprite.center_y = self.gamer.y
@@ -222,24 +376,10 @@ class Game(arcade.View):
             self.collision_list
         )
 
-        self.total_mobs_to_spawn = 20  # Общее количество мобов на карте
-        self.mob_spawn_rate = 0.02  # Шанс спавна моба за кадр
-        self.min_mob_distance_from_player = 200  # Минимальное расстояние от игрока
-        self.max_spawn_attempts = 50  # Максимальное количество попыток спавна
-        self.mobs = []
-
-        self.item_database = self.create_item_database()
-        self.items_on_map = []
-        self.item_to_pickup = None
-        self.can_pick_up = False
-
         self.move_up = False
         self.move_down = False
         self.move_left = False
         self.move_right = False
-
-        self.chunk_size = 256
-        self.chunks_initialized = set()
 
         self.distance_traveled = 0
         self.last_x = self.gamer.x
@@ -252,33 +392,7 @@ class Game(arcade.View):
 
 
     def create_item_database(self):
-        return [{"name": "Меч", "type": "weapon", "texture": "images/things/thing_sword.jpg", "quantity": 1,
-                 "damage": 5, "heal": 0, "defence": 0},
-                {"name": "Нож", "type": "weapon", "texture": "images/things/thing_knife.jpg", "quantity": 2,
-                 "damage": 3, "heal": 0, "defence": 0},
-                {"name": "Щит", "type": "defense", "texture": "images/things/thing_shield.jpg", "quantity": 1,
-                 "defence": 5, "heal": 0, "damage": 0},
-                {"name": "Каменный молоток", "type": "weapon", "texture": "images/things/thing_stone_molotok.jpg", "quantity": 2,
-                 "damage": 4, "heal": 0, "defence": 0},
-                {"name": "Железный молоток", "type": "weapon", "texture": "images/things/thing_iron_molotok.jpg", "quantity": 1,
-                 "damage": 6, "heal": 0, "defence": 0},
-                {"name": "Топор", "type": "weapon", "texture": "images/things/thing_axe.jpg", "quantity": 2,
-                 "damage": 10, "heal": 0, "defence": 0},
-                {"name": "Картофель", "type": "food", "texture": "images/food/food_potato.jpg", "quantity": 5,
-                 "heal": 4, "defence": 0, "damage": 0},
-                {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
-                 "heal": 2, "defence": 0, "damage": 0},
-                {"name": "Яблоко", "type": "food", "texture": "images/food/food_apple.jpg", "quantity": 5,
-                 "heal": 3, "defence": 0, "damage": 0},
-                {"name": "Растение", "type": "food", "texture": "images/food/food_grass.jpg", "quantity": 15,
-                 "heal": 1, "defence": 0, "damage": 0},
-                {"name": "Тухлое мясо", "type": "food", "texture": "images/food/food_bad_meat.jpg", "quantity": 8,
-                 "heal": random.randint(-10, 3), "defence": 0, "damage": 0},
-                {"name": "Мясо", "type": "food", "texture": "images/food/food_meet.jpg", "quantity": 1,
-                 "heal": 10, "defence": 0, "damage": 0},
-                {"name": "Рыба", "type": "food", "texture": "images/food/food_fish.jpg", "quantity": 1,
-                 "heal": 10, "defence": 0, "damage": 0},
-                ]
+        return ITEMS
 
     def put_item(self):
         max_try = 10
@@ -292,26 +406,28 @@ class Game(arcade.View):
             return True
 
         for i in range(amount):
-            num = random.randint(0, 12)
+            num = random.randint(0, 6)
             if self.items[num]["quantity"] == 0:
                 continue
             texture_name = self.items[num]["texture"]
             item = Item(name=self.items[num]["name"],
                              item_type=self.items[num]["type"],
-                             texture=arcade.Sprite(texture_name, scale=0.2),
+                             texture=arcade.Sprite(texture_name, scale=0.5, center_x=0, center_y=0),
                              quantity=self.items[num]["quantity"],
                              heal=self.items[num]["heal"],
-                             damage=self.items[num]["damage"],
-                             defence=self.items[num]["defence"])
+                            hunger=self.items[num]["hunger"])
             for j in range(max_try):
-                item.texture.x = random.randint(0, self.world_width * TILE_SCALING * TILE_SIZE)
-                item.texture.y = random.randint(0, self.world_height * TILE_SCALING * TILE_SIZE)
-                if in_square(item.texture.x, item.texture.y) and arcade.check_for_collision_with_list(item.texture,
+                item.texture.center_x = random.randint(0, self.world_width * TILE_SCALING * TILE_SIZE)
+                item.texture.center_y = random.randint(0, self.world_height * TILE_SCALING * TILE_SIZE)
+                print(arcade.check_for_collision_with_list(item.texture, self.collision_list))
+                if in_square(item.texture.center_x, item.texture.center_y) and not arcade.check_for_collision_with_list(item.texture,
                                                                                                       self.collision_list)\
                         and item.texture not in self.items_sprite_list:
                     self.items_sprite_list.append(item.texture)
                     self.collection.append(item)
                     self.items[num]["quantity"] -= 1
+                    # print(item.texture.center_x, item.texture.center_y)
+                    # print(item.name, item.quantity) #debug
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
@@ -334,7 +450,7 @@ class Game(arcade.View):
             self.move_right = True
 
         elif key == arcade.key.SPACE:
-            game_inter = Inventory_View()
+            game_inter = Inventory_View(self)
             self.window.show_view(game_inter)
 
     def on_key_release(self, key, modifiers):
@@ -367,6 +483,7 @@ class Game(arcade.View):
 
 
     def on_update(self, delta_time: float) -> bool | None:
+        global LEFT_CATCHING
         if self.gamer.hp <= 0:
             game_over = GameOver()
             self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", scale=0.5), speed=5, x=self.world_width//2, y=self.world_height//2)
@@ -379,6 +496,8 @@ class Game(arcade.View):
             self.gamer.hp -= 0.02
         else:
             self.gamer.hungry -= 0.002
+
+        self.gamer.timer += delta_time
 
         speed = self.gamer.speed
 
@@ -436,6 +555,25 @@ class Game(arcade.View):
 
         self.camera.position = (self.cam_target[0], self.cam_target[1])
 
+        hitted = arcade.check_for_collision_with_list(self.player_sprite, self.items_sprite_list)
+
+        for item in hitted:
+            item.remove_from_sprite_lists()
+            for i in range(4):
+                if INVENTORY.free_slots[i] == "Empty":
+                    for elem in self.collection:
+                        if elem.texture == item:
+                            INVENTORY.free_slots[i] = elem.name
+
+        to_win_catch = arcade.check_for_collision_with_list(self.player_sprite, self.to_win_list)
+        for elem in to_win_catch:
+            elem.remove_from_sprite_lists()
+            self.left -= 1
+            LEFT_CATCHING = self.left
+
+
+
+
     def on_resize(self, width: int, height: int) -> bool | None:
         self.camera.match_window()
         self.gui_camera.match_window()
@@ -449,10 +587,11 @@ class Game(arcade.View):
         self.floor_list.draw()
         self.wall_list.draw()
         self.pos1.draw()
-        self.player_list.draw()
         self.pos2.draw()
         self.pos3.draw()
         self.items_sprite_list.draw()
+        self.to_win_list.draw()
+        self.player_list.draw()
         self.gui_camera.use()
 
 
