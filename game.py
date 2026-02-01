@@ -1,12 +1,17 @@
-import math
 import random
+from sqlite3 import connect
 
 import arcade
-from PIL.ImageOps import scale
+from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout,
+                             QLabel, QLineEdit, QPushButton, QMessageBox, QApplication
+                             )
 from arcade import SpriteList
 from arcade.examples.camera_platform import TILE_SCALING
 from arcade.gui import UIManager, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
+
+conn = connect('arcamaze.db')
+cursor = conn.cursor()
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 1200
@@ -24,21 +29,23 @@ LEVEL = 1
 DELTA_HP = 2
 DELTA_HUNGER = 0.000000000001
 TOTAL_TIME = 0
+USERNAME = ''
 ITEMS = [{"name": "Картофель", "type": "food", "texture": "images/food/food_potato.jpg", "quantity": 5,
-                 "heal": 4, "hunger": 2},
-                {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
-                 "heal": 2, "hunger": - 1},
-                {"name": "Яблоко", "type": "food", "texture": "images/food/food_apple.jpg", "quantity": 5,
-                 "heal": 3, "hunger": - 3},
-                {"name": "Растение", "type": "food", "texture": "images/food/food_grass.jpg", "quantity": 15,
-                 "heal": 1, "hunger": -4},
-                {"name": "Тухлое мясо", "type": "food", "texture": "images/food/food_bad_meet.jpg", "quantity": 8,
-                 "heal": random.randint(-10, 3), "hunger": 2},
-                {"name": "Мясо", "type": "food", "texture": "images/food/food_meet.jpg", "quantity": 1,
-                 "heal": 10, "hunger": 10},
-                {"name": "Рыба", "type": "food", "texture": "images/food/food_fish.jpg", "quantity": 1,
-                 "heal": 10, "hunger": 10},
-                ]
+          "heal": 4, "hunger": 2},
+         {"name": "Ягоды", "type": "food", "texture": "images/food/food_berries.jpg", "quantity": 8,
+          "heal": 2, "hunger": - 1},
+         {"name": "Яблоко", "type": "food", "texture": "images/food/food_apple.jpg", "quantity": 5,
+          "heal": 3, "hunger": - 3},
+         {"name": "Растение", "type": "food", "texture": "images/food/food_grass.jpg", "quantity": 15,
+          "heal": 1, "hunger": -4},
+         {"name": "Тухлое мясо", "type": "food", "texture": "images/food/food_bad_meet.jpg", "quantity": 8,
+          "heal": random.randint(-10, 3), "hunger": 2},
+         {"name": "Мясо", "type": "food", "texture": "images/food/food_meet.jpg", "quantity": 1,
+          "heal": 10, "hunger": 10},
+         {"name": "Рыба", "type": "food", "texture": "images/food/food_fish.jpg", "quantity": 1,
+          "heal": 10, "hunger": 10},
+         ]
+
 
 class Character:
     def __init__(self, name, hp, damage, defense, speed, x, y, picture):
@@ -53,7 +60,101 @@ class Character:
         self.hungry = 100
         self.timer = 0
 
-GAMER = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", scale=0.5), speed=5, x=WORLD_WIDTH//2, y=WORLD_HEIGHT//2)
+
+GAMER = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(
+    ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", scale=0.5), speed=5,
+                  x=WORLD_WIDTH // 2, y=WORLD_HEIGHT // 2)
+
+import arcade
+import sqlite3
+
+
+class SimpleLeaderboard(arcade.View):
+
+    def __init__(self, main_menu):
+        super().__init__()
+        self.main_menu = main_menu
+        self.scroll_y = 0
+        self.max_scroll = 0
+        self.ui_manager = UIManager()
+        self.ui_manager.enable()
+        self.start_y = self.window.height - 120 + self.scroll_y
+        self.header_y = self.start_y + 20
+        self.setup_widgets()
+
+    def load_leaderboard(self):
+        try:
+            conn = sqlite3.connect('arcamaze.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT username, time FROM Leaders ORDER BY time DESC LIMIT 3;")
+            data = cursor.fetchall()
+            conn.close()
+            return data
+        except:
+            return []
+
+    def setup_widgets(self):
+        data = self.load_leaderboard()
+
+        horisontal = UIBoxLayout(vertical=False, space_between=30, x=300, y=self.window.height - 100)
+        x1 = UILabel(text="🏆 ТАБЛИЦА ЛИДЕРОВ 🏆",
+                     text_color=arcade.color.GOLD,
+                     font_size=32,
+                     bold=True,
+                     anchor_x="center")
+        x2 = UILabel(text="USERNAME",
+                     text_color=arcade.color.GOLD, font_size=20)
+        name_box = UIBoxLayout(vertical=True, space_between=30)
+        name_box.add(x2)
+        x3 = UILabel(text="TIME",
+                     text_color=arcade.color.GOLD, font_size=20)
+        time_box = UIBoxLayout(vertical=True, space_between=30)
+        time_box.add(x3)
+
+        for i, (username, time) in enumerate(data):
+            user = UILabel(text=username, text_color=arcade.color.WHITE, font_size=15, )
+            time = UILabel(text=time, text_color=arcade.color.WHITE, font_size=15, )
+            name_box.add(user)
+            time_box.add(time)
+
+        horisontal.add(name_box)
+        horisontal.add(time_box)
+        self.ui_manager.add(horisontal)
+
+    def on_draw(self):
+        self.clear()
+        self.ui_manager.draw()
+
+
+class LoginDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Вход в аккаунт')
+        self.setFixedSize(300, 150)
+        main_layout = QVBoxLayout()
+        title_label = QLabel('Войти в аккаунт')
+        self.username_input = QLineEdit()
+        self.username_input.setPlaceholderText('Введите имя аккаунта')
+        button_layout = QHBoxLayout()
+        save_button = QPushButton('Сохранить')
+        save_button.clicked.connect(self.save_account)
+        button_layout.addWidget(save_button)
+        main_layout.addWidget(title_label)
+        main_layout.addWidget(self.username_input)
+        main_layout.addLayout(button_layout)
+        self.setLayout(main_layout)
+
+    def save_account(self):
+        """Обработчик нажатия кнопки Сохранить"""
+        USERNAME = self.username_input.text().strip()
+
+        if not USERNAME:
+            QMessageBox.warning(self, 'Ошибка', 'Введите имя аккаунта!')
+            return
+        self.accept()
 
 
 class Inventory:
@@ -120,7 +221,6 @@ class Inventory_View(arcade.View):
         slot4 = UITextureButton(texture=slot_4_texture,
                                 scale=0.2)
 
-
         label_hp = UILabel(text=f"{GAMER.hp}/100", text_color=(0, 0, 0))
         x1 = UIBoxLayout(vertical=False, space_between=20)
         x1.add(hp)
@@ -141,7 +241,7 @@ class Inventory_View(arcade.View):
         y1.add(slot1)
         y1.add(label1)
         self.v_box_2.add(y1)
-        label2= UILabel(text=INVENTORY.free_slots[1], text_color=(0, 0, 0))
+        label2 = UILabel(text=INVENTORY.free_slots[1], text_color=(0, 0, 0))
         y2 = UIBoxLayout(vertical=False, space_between=20)
         y2.add(slot2)
         y2.add(label2)
@@ -232,7 +332,6 @@ class BackgroundSprite(arcade.Sprite):
         self.center_y = self.window.height // 2
 
 
-
 class Choose_level(arcade.View):
     def __init__(self, level):
         super().__init__()
@@ -249,13 +348,13 @@ class Choose_level(arcade.View):
 
         btn1 = UITextureButton(texture=arcade.load_texture("images/interface/1.jpg"), scale=0.4,
                                texture_hovered=arcade.load_texture("images/interface/1_hovered.jpg"),
-                               texture_pressed=arcade.load_texture("images/interface/1_pressed.jpg"),)
+                               texture_pressed=arcade.load_texture("images/interface/1_pressed.jpg"), )
         btn2 = UITextureButton(texture=arcade.load_texture("images/interface/2.jpg"), scale=0.4,
                                texture_hovered=arcade.load_texture("images/interface/2_hovered.jpg"),
-                               texture_pressed=arcade.load_texture("images/interface/2_pressed.jpg"),)
+                               texture_pressed=arcade.load_texture("images/interface/2_pressed.jpg"), )
         btn3 = UITextureButton(texture=arcade.load_texture("images/interface/3.jpg"), scale=0.2,
                                texture_hovered=arcade.load_texture("images/interface/3_hovered.jpg"),
-                               texture_pressed=arcade.load_texture("images/interface/3_pressed.jpg"),)
+                               texture_pressed=arcade.load_texture("images/interface/3_pressed.jpg"), )
         buttons.add(btn1)
         buttons.add(btn2)
         buttons.add(btn3)
@@ -346,6 +445,12 @@ class StartMenu(arcade.View):
 
         create_game.on_click = self.button_press
         choose_level.on_click = self.choose_level_fun
+        sign_up.on_click = self.account
+        lid_tab.on_click = self.lid_tab
+
+    def lid_tab(self, *args):
+        lid = SimpleLeaderboard(self)
+        self.window.show_view(lid)
 
     def choose_level_fun(self, *args):
         window_view = Choose_level(self)
@@ -355,6 +460,46 @@ class StartMenu(arcade.View):
         game_view = Game()
         self.window.show_view(game_view)
         return
+
+    def account(self, *args):
+        app = QApplication.instance()
+        if not app:
+            app = QApplication([])
+        dialog = LoginDialog()
+        result = dialog.exec()
+
+        if result == QDialog.DialogCode.Accepted:
+            return True
+        return None
+
+
+class Winning(arcade.View):
+    def __init__(self):
+        super().__init__()
+        self.ui_manager = UIManager()
+        self.ui_manager.enable()
+        self.setup_widgets()
+
+    def setup_widgets(self):
+        self.ui_manager.clear()
+        self.t1 = UILabel(text="ПОЗДРАВЛЯЕМ С ПОБЕДОЙ", text_color=arcade.color.RED_BROWN, font_size=60, )
+        self.t2 = UILabel(text=f"ВАШЕ ВРЕМЯ: {int(TOTAL_TIME)}", text_color=arcade.color.RED_BROWN, font_size=60, )
+        self.x1 = UIBoxLayout(vertical=True, space_between=20)
+        self.y2 = UIAnchorLayout()
+        self.x1.add(self.t1)
+        self.x1.add(self.t2)
+        self.y2.add(self.x1)
+        self.ui_manager.add(self.y2)
+        if USERNAME:
+            conn = connect("arcamaze.db")
+            cursor.execute("""UPDATE Leaders SET time = ? WHERE USERNAME = ?""", (int(TOTAL_TIME), USERNAME))
+            conn.commit()
+            conn.close()
+
+    def on_draw(self):
+        self.clear()
+        # self.background.draw()
+        self.ui_manager.draw()
 
 
 class Item:  # предмет класс
@@ -383,11 +528,13 @@ class GameOver(arcade.View):
     def __init__(self):
         super().__init__()
         self.ui_manager = UIManager()
-        self._background_color = arcade.color.CARMINE_RED
+        self.ui_manager.enable()
+        self.background_color = arcade.color.RED_BROWN
 
-    def setup(self):
-        y1 = UILabel(text='Вы проиграли', font_size=80, text_color=arcade.color.BLACK,)
-        x2 = UILabel(text=f"Общее время в игре: {int(TOTAL_TIME)}", font_size=80, text_color=arcade.color.BLACK,)
+    def setup_widgets(self):
+        self.ui_manager.clear()
+        y1 = UILabel(text='Вы проиграли', font_size=80, text_color=arcade.color.BLACK, )
+        x2 = UILabel(text=f"Общее время в игре: {int(TOTAL_TIME)}", font_size=80, text_color=arcade.color.BLACK, )
         x1 = UITextureButton(texture=arcade.load_texture("images/interface/leave.jpg"), scale=0.5,
                              texture_hovered=arcade.load_texture("images/interface/leave_hovered.jpg"),
                              texture_pressed=arcade.load_texture("images/interface/leave_pressed.jpg"))
@@ -417,6 +564,8 @@ class Game(arcade.View):
         super().__init__()
         global LEFT_CATCHING, DELTA_HP, DELTA_HUNGER
 
+        self.collected_amount = 10
+
         self.world_width = 96 * TILE_SIZE * TILE_SCALING
         self.world_height = 96 * TILE_SIZE * TILE_SCALING
 
@@ -428,7 +577,6 @@ class Game(arcade.View):
         self.gamer = GAMER
         self.camera = arcade.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
-
 
         self.player_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
@@ -490,41 +638,30 @@ class Game(arcade.View):
         self.collection = []
         self.put_item()
 
-
     def create_item_database(self):
         return ITEMS
 
     def put_item(self):
-        max_try = 10
         amount = 30
-        item = None
-
-        def in_square(x, y):
-            if ((32 * TILE_SIZE * TILE_SCALING < x < 59 * TILE_SIZE * TILE_SCALING) and
-                    (37 * TILE_SIZE * TILE_SCALING < y < 66 * TILE_SIZE * TILE_SCALING)):
-                return False
-            return True
-
         for i in range(amount):
             num = random.randint(0, 6)
             if self.items[num]["quantity"] == 0:
                 continue
             texture_name = self.items[num]["texture"]
             item = Item(name=self.items[num]["name"],
-                             item_type=self.items[num]["type"],
-                             texture=arcade.Sprite(texture_name, scale=0.5, center_x=0, center_y=0),
-                             quantity=self.items[num]["quantity"],
-                             heal=self.items[num]["heal"],
-                            hunger=self.items[num]["hunger"])
-            for j in range(max_try):
-                item.texture.center_x = random.randint(0, self.world_width * TILE_SCALING * TILE_SIZE)
-                item.texture.center_y = random.randint(0, self.world_height * TILE_SCALING * TILE_SIZE)
-                if in_square(item.texture.center_x, item.texture.center_y) and not arcade.check_for_collision_with_list(item.texture,
-                                                                                                      self.collision_list)\
-                        and item.texture not in self.items_sprite_list:
-                    self.items_sprite_list.append(item.texture)
-                    self.collection.append(item)
-                    self.items[num]["quantity"] -= 1
+                        item_type=self.items[num]["type"],
+                        texture=arcade.Sprite(texture_name, scale=0.1, center_x=0, center_y=0),
+                        quantity=self.items[num]["quantity"],
+                        heal=self.items[num]["heal"],
+                        hunger=self.items[num]["hunger"])
+            item.texture.center_x = arcade.math.rand_in_circle((WORLD_WIDTH // 2, WORLD_HEIGHT // 2), WORLD_WIDTH // 2)[
+                0]
+            item.texture.center_y = \
+            arcade.math.rand_in_circle((WORLD_WIDTH // 2, WORLD_HEIGHT // 2), WORLD_HEIGHT // 2)[1]
+            if not arcade.check_for_collision_with_list(item.texture, self.collision_list):
+                self.items_sprite_list.append(item.texture)
+                self.collection.append(item)
+                self.items[num]["quantity"] -= 1
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
@@ -570,21 +707,23 @@ class Game(arcade.View):
 
     def draw_help(self):
         arcade.Text(f"Пройдено: {int(self.distance_traveled)} px",
-                         10, self.window.height - 140, arcade.color.LIGHT_GREEN, 14)
+                    10, self.window.height - 140, arcade.color.LIGHT_GREEN, 14)
 
         arcade.Text(f"Собрано частиц {6}/5)",
-                         10, self.window.height - 170, arcade.color.LIGHT_GREEN, 14)
-
-    def on_show(self):
-        pass
-
+                    10, self.window.height - 170, arcade.color.LIGHT_GREEN, 14)
 
     def on_update(self, delta_time: float) -> bool | None:
         global LEFT_CATCHING, TOTAL_TIME
         delta_x = 32
+        if self.collected_amount == 0:
+            win = Winning()
+            self.window.show_view(win)
+            pass
         if self.gamer.hp <= 0:
             game_over = GameOver()
-            self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", scale=0.5), speed=5, x=self.world_width//2, y=self.world_height//2)
+            self.gamer = Character(name='Игрок', hp=100, damage=2, defense=0, picture=arcade.Sprite(
+                ":resources:images/animated_characters/female_person/femalePerson_idle.png", scale=0.5), speed=5,
+                                   x=self.world_width // 2, y=self.world_height // 2)
             self.window.show_view(game_over)
 
         self.player_sprite.change_x = 0
@@ -655,7 +794,7 @@ class Game(arcade.View):
         self.camera.position = (self.cam_target[0], self.cam_target[1])
 
         hitted = arcade.check_for_collision_with_list(self.player_sprite, self.items_sprite_list)
-
+        z = False
         for item in hitted:
             item.remove_from_sprite_lists()
             for i in range(4):
@@ -663,20 +802,20 @@ class Game(arcade.View):
                     for elem in self.collection:
                         if elem.texture == item:
                             INVENTORY.free_slots[i] = elem.name
+                            z = True
+                            break
+                if z:
+                    break
 
         to_win_catch = arcade.check_for_collision_with_list(self.player_sprite, self.to_win_list)
         for elem in to_win_catch:
             elem.remove_from_sprite_lists()
-            self.left -= 1
-            LEFT_CATCHING = self.left
-
-
-
+            self.collected_amount -= 1
+            LEFT_CATCHING = self.collected_amount
 
     def on_resize(self, width: int, height: int) -> bool | None:
         self.camera.match_window()
         self.gui_camera.match_window()
-
 
     def on_draw(self):
         self.clear()
@@ -692,7 +831,6 @@ class Game(arcade.View):
         self.to_win_list.draw()
         self.player_list.draw()
         self.gui_camera.use()
-
 
 
 window = arcade.Window(resizable=True, title='ᗣᖇᙅᗣᙏᗣZᙓ')

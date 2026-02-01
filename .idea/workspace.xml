@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни">
+    <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="-">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/interface/1_presssed.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/interface/1_pressed.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/interface/2_howered.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/interface/2_hovered.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,19 +51,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.aaa.executor": "Run",
-    "Python.check.executor": "Run",
-    "Python.game.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "vika",
-    "last_opened_file_path": "C:/Users/kushk/PycharmProjects/Arcade_project/images/interface"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.aaa.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check.executor&quot;: &quot;Run&quot;,
+    &quot;Python.game.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;vika&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/kushk/PycharmProjects/Arcade_project/images/interface&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\interface" />
@@ -253,5 +251,16 @@
     <MESSAGE value="рабочая карта, вещички, начало инвентаря" />
     <MESSAGE value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
     <option name="LAST_COMMIT_MESSAGE" value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/game.py</url>
+          <line>645</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
