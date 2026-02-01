@@ -1,0 +1,106 @@
+Index: README.md
+===================================================================
+diff --git a/README.md b/README.md
+deleted file mode 100644
+--- a/README.md	(revision 731424246b20276a8508b1a7735517bdefb9823d)
++++ /dev/null	(revision 731424246b20276a8508b1a7735517bdefb9823d)
+@@ -1,99 +0,0 @@
+-[Главное меню (1).py](https://github.com/user-attachments/files/24420988/1.py)
+-import arcade
+-import arcade.gui
+-
+-SCREEN_WIDTH = 800
+-SCREEN_HEIGHT = 600
+-SCREEN_TITLE = "Лабиринт"
+-
+-
+-# первый экран
+-class MainMenuView(arcade.View):
+-    def __init__(self):
+-        super().__init__()
+-        self.ui_manager = arcade.gui.UIManager()
+-
+-    def on_show_view(self):
+-        arcade.set_background_color(arcade.color.BLACK)
+-        self.ui_manager.enable()
+-
+-        layout = arcade.gui.UIAnchorLayout()
+-        v_box = arcade.gui.UIBoxLayout(space_between=20)
+-
+-        title = arcade.gui.UILabel(
+-            text="🍃 LABYRINTH 🍃",
+-            font_size=40,
+-            text_color=arcade.color.ANTIQUE_WHITE
+-        )
+-        v_box.add(title)
+-
+-        # вход
+-        enter_button = arcade.gui.UIFlatButton(text="🍃 Войти в лабиринт 🍃", width=320, height=60)
+-        v_box.add(enter_button)
+-
+-        @enter_button.event("on_click")
+-        def on_click(event):
+-            self.window.show_view(MenuView())
+-
+-        layout.add(v_box, anchor_x="center_x", anchor_y="center_y")
+-        self.ui_manager.add(layout)
+-
+-    def on_hide_view(self):
+-        self.ui_manager.disable()
+-
+-    def on_draw(self):
+-        self.clear()
+-        self.ui_manager.draw()
+-
+-
+-# меню
+-class MenuView(arcade.View):
+-    def __init__(self):
+-        super().__init__()
+-        self.ui_manager = arcade.gui.UIManager()
+-
+-    def on_show_view(self):
+-        arcade.set_background_color(arcade.color.BLACK)
+-        self.ui_manager.enable()
+-
+-        layout = arcade.gui.UIAnchorLayout()
+-        v_box = arcade.gui.UIBoxLayout(space_between=20)
+-
+-        # заголовок
+-        title = arcade.gui.UILabel(
+-            text="🍃 Меню 🍃",
+-            font_size=32,
+-            text_color=arcade.color.ANTIQUE_WHITE
+-        )
+-        v_box.add(title)
+-
+-        buttons_text = ["Начать игру", "Выбор персонажа", "Настройки"]
+-
+-        for t in buttons_text:
+-            btn = arcade.gui.UIFlatButton(text=f"🍃 {t} 🍃", width=320, height=60)
+-            v_box.add(btn)
+-
+-            @btn.event("on_click")
+-            def on_click(event, t=t):
+-                print(f"Нажата кнопка: {t}")
+-
+-        layout.add(v_box, anchor_x="center_x", anchor_y="center_y")
+-        self.ui_manager.add(layout)
+-
+-    def on_hide_view(self):
+-        self.ui_manager.disable()
+-
+-    def on_draw(self):
+-        self.clear()
+-        self.ui_manager.draw()
+-
+-
+-def main():
+-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+-    window.show_view(MainMenuView())
+-    arcade.run()
+-
+-
+-if __name__ == "__main__":
+-    main()
+-
