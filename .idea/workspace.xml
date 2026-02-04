@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="-">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tilesets/Preview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/Preview.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tilesets/ffff.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/ffff.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tilesets/hyptosis_til-art-batch-2.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/hyptosis_til-art-batch-2.tsx" afterDir="false" />
@@ -240,7 +239,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770214178159</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="-">
+      <option name="closed" value="true" />
+      <created>1770216706039</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770216706039</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
