@@ -6,8 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="-">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map_arcamaze7.tmx" beforeDir="false" afterPath="$PROJECT_DIR$/map_arcamaze7.tmx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/Preview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/Preview.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/ffff.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/ffff.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/hyptosis_til-art-batch-2.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/hyptosis_til-art-batch-2.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/hyptosis_tile-art-batch-3.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/hyptosis_tile-art-batch-3.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/hyptosis_tile-art-batch-5.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/hyptosis_tile-art-batch-5.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tilesets/пппп.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tilesets/пппп.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +65,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "vika",
     "last_opened_file_path": "C:/Users/kushk/PycharmProjects/Arcade_project/tilesets"
   }
 }]]></component>
@@ -228,7 +232,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769960444400</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="-">
+      <option name="closed" value="true" />
+      <created>1770214178159</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770214178159</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -259,6 +271,7 @@
     <MESSAGE value="картинки и мобы" />
     <MESSAGE value="рабочая карта, вещички, начало инвентаря" />
     <MESSAGE value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
-    <option name="LAST_COMMIT_MESSAGE" value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
+    <MESSAGE value="-" />
+    <option name="LAST_COMMIT_MESSAGE" value="-" />
   </component>
 </project>
