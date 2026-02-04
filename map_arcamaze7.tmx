@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="96" height="96" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="1">
  <tileset firstgid="1" name="ffff" tilewidth="32" tileheight="32" tilecount="900" columns="30">
-  <image source="../../Downloads/hyptosis_tile-art-batch-1.png" width="960" height="960"/>
+  <image source="tilesets/hyptosis_tile-art-batch-1.png" width="960" height="960"/>
  </tileset>
  <tileset firstgid="901" name="hyptosis_til-art-batch-2" tilewidth="32" tileheight="32" tilecount="900" columns="30">
-  <image source="../../Downloads/hyptosis_til-art-batch-2.png" width="960" height="960"/>
+  <image source="tilesets/hyptosis_til-art-batch-2.png" width="960" height="960"/>
  </tileset>
  <tileset firstgid="1801" name="hyptosis_tile-art-batch-3" tilewidth="32" tileheight="32" tilecount="900" columns="30">
-  <image source="../../Downloads/hyptosis_tile-art-batch-3.png" width="960" height="960"/>
+  <image source="tilesets/hyptosis_tile-art-batch-3.png" width="960" height="960"/>
  </tileset>
  <tileset firstgid="2701" name="пппп" tilewidth="32" tileheight="32" tilecount="900" columns="30">
-  <image source="../../Downloads/hyptosis_tile-art-batch-4.png" width="960" height="960"/>
+  <image source="tilesets/hyptosis_tile-art-batch-4.png" width="960" height="960"/>
  </tileset>
  <tileset firstgid="3601" source="../../Preview.tsx"/>
  <layer id="9" name="collisions" width="96" height="96" locked="1">

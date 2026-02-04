@@ -731,11 +731,11 @@ class Game(arcade.View):
         TOTAL_TIME += delta_time
 
         if int(TOTAL_TIME) % delta_x == 0:
-            if self.gamer.hungry == 0:
-                self.gamer.hp = int(self.gamer.hp - DELTA_HUNGER)
+            if GAMER.hungry == 0:
+                GAMER.hp = int(GAMER.hp - DELTA_HUNGER)
             else:
-                if self.gamer.hungry > 0:
-                    self.gamer.hungry = int(self.gamer.hungry - DELTA_HUNGER)
+                if GAMER.hungry > 0:
+                    GAMER.hungry = int(GAMER.hungry - DELTA_HUNGER)
 
         speed = self.gamer.speed
 

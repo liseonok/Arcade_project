@@ -7,6 +7,7 @@
     <list default="true" id="159687ac-c0cc-429c-a2be-d822c7e7ad03" name="Changes" comment="-">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/map_arcamaze7.tmx" beforeDir="false" afterPath="$PROJECT_DIR$/map_arcamaze7.tmx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,26 +52,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.aaa.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check.executor&quot;: &quot;Run&quot;,
-    &quot;Python.game.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;vika&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/kushk/PycharmProjects/Arcade_project/images/interface&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.aaa.executor": "Run",
+    "Python.check.executor": "Run",
+    "Python.game.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/kushk/PycharmProjects/Arcade_project/tilesets"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\tilesets" />
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\interface" />
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\things" />
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\images\food" />
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project\sounds" />
-      <recent name="C:\Users\kushk\PycharmProjects\Arcade_project" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\kushk\PycharmProjects\Arcade_project" />
@@ -219,7 +220,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769733011880</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="merge">
+      <option name="closed" value="true" />
+      <created>1769960444400</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1769960444400</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -251,16 +260,5 @@
     <MESSAGE value="рабочая карта, вещички, начало инвентаря" />
     <MESSAGE value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
     <option name="LAST_COMMIT_MESSAGE" value="кнопочки, инвентарь, измененная карта, логика игры, сломанный мозг, логика построения&#10;осталось добавить блесточки, анимацию, бд и уровни" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/game.py</url>
-          <line>645</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
